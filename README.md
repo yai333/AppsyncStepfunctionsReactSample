@@ -24,7 +24,7 @@ In this way users can get movie data from Appsync graphql api instead of externa
 
 Note: Since external rest api is not working properly all the time. I added `Retry` to each of the step functions, if crawl job function fun failed, the function would rerun by given `Retry` times automatically.
 
-![](diagram.jpg)
+![](diagram.png)
 
 ![](stepfunction.png)
 
