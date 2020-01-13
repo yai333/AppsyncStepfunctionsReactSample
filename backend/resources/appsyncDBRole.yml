@@ -1,0 +1,31 @@
+Type: "AWS::IAM::Role"
+Properties:
+  RoleName: "moviejet-db-${self:custom.appSync.serviceRole}-${self:provider.stage}"
+  AssumeRolePolicyDocument:
+    Version: "2012-10-17"
+    Statement:
+      - Effect: "Allow"
+        Principal:
+          Service:
+            - "appsync.amazonaws.com"
+        Action:
+          - "sts:AssumeRole"
+  Policies:
+    - PolicyName: "moviejet-db-${self:custom.appSync.serviceRole}--Policy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "dynamodb:Query"
+              - "dynamodb:BatchWriteItem"
+              - "dynamodb:GetItem"
+              - "dynamodb:PutItem"
+              - "dynamodb:Scan"
+              - "dynamodb:UpdateItem"
+            Resource:
+              - "Fn::GetAtt": ["MoviesTable", "Arn"]
+              - "Fn::Join":
+                  - "/"
+                  - - { "Fn::GetAtt": ["MoviesTable", "Arn"] }
+                    - "index/*"

@@ -1,0 +1,94 @@
+service: moviejet
+
+provider:
+  stage: ${opt:stage, 'dev'}
+  name: aws
+  runtime: nodejs12.x
+  timeout: 600
+  region: ${opt:region, 'ap-southeast-2'}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "states:StartExecution"
+      Resource:
+        - "*"
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:Query"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:Scan"
+      Resource:
+        - "Fn::GetAtt": ["MoviesTable", "Arn"]
+        - "Fn::Join":
+            - "/"
+            - - { "Fn::GetAtt": ["MoviesTable", "Arn"] }
+              - "index/*"
+
+plugins:
+  - serverless-appsync-plugin
+  - serverless-pseudo-parameters
+  - serverless-step-functions
+
+custom:
+  apiAccessToken: ${ssm:moviejet-access-token~true}
+  moviesTable: "movies"
+  tableThroughputs:
+    production: "5"
+    dev: "1"
+  appSync:
+    serviceRole: "AppSyncServiceRole"
+    region: ${self:provider.region}
+    authenticationType: API_KEY
+    caching:
+      behavior: PER_RESOLVER_CACHING
+      ttl: 1000
+      type: "T2_SMALL"
+    logConfig:
+      loggingRoleArn: { Fn::GetAtt: [AppSyncLogServiceRole, Arn] }
+      level: ERROR
+    mappingTemplatesLocation: mapping-templates/
+    mappingTemplates:
+      - dataSource: Movies
+        type: Query
+        field: getMovies
+        request: "query-movies-request.vtl"
+        response: "query-movies-response.vtl"
+      - dataSource: Movies
+        type: Movie
+        field: details
+        request: "movie-details-request.vtl"
+        response: "movie-details-response.vtl"
+    dataSources:
+      - type: AMAZON_DYNAMODB
+        name: Movies
+        description: "Movies table"
+        config:
+          tableName: ${self:custom.moviesTable}
+          serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
+
+functions:
+  getMovies:
+    handler: src/handler.getMovies
+  syncMovieItem:
+    handler: src/handler.syncMovieItem
+  crawlMovies:
+    handler: src/handler.crawlMovies
+    environment:
+      STATEMACHINE_ARN: "${self:resources.Outputs.SyncMoviesProcess.Value}"
+    events:
+      - schedule: rate(12 hours)
+
+stepFunctions: ${file(resources/stepFunctions.yml)}
+
+resources:
+  Outputs:
+    SyncMoviesProcess:
+      Value:
+        Ref: SyncMoviesProcessDash${self:provider.stage}
+      Export:
+        Name: "moviejet:${self:provider.stage}:SyncMoviesProcessArn"
+  Resources:
+    MoviesTable: ${file(resources/moviesTable.yml)}
+    AppSyncDynamoDBServiceRole: ${file(resources/appsyncDBRole.yml)}
+    AppSyncLogServiceRole: ${file(resources/appsyncServiceRole.yml)}

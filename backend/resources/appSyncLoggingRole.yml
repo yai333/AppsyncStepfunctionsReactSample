@@ -1,0 +1,22 @@
+Type: "AWS::IAM::Role"
+Properties:
+  RoleName: "moviejet-log-${self:custom.appSync.serviceRole}-${self:provider.stage}"
+  AssumeRolePolicyDocument:
+    Version: "2012-10-17"
+    Statement:
+      - Effect: "Allow"
+        Principal:
+          Service:
+            - "appsync.amazonaws.com"
+        Action:
+          - "sts:AssumeRole"
+  Policies:
+    - PolicyName: "moviejet-log-${self:custom.appSync.serviceRole}-Policy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "logs:*"
+            Resource:
+              - "arn:aws:logs:*:*:*"

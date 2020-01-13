@@ -1,0 +1,30 @@
+type Movie {
+  id: String
+  source: String
+  details: MovieDetails
+}
+
+type MovieDetails {
+  title: String
+  year: String
+  poster: String
+  rated: String
+  released: String
+  runtime: String
+  director: String
+  plot: String
+  language: String
+  country: String
+  votes: String
+  price: Float
+}
+
+type Movies {
+  nextToken: String
+  totalCount: Int
+  items: [Movie]
+}
+
+type Query {
+  getMovies(limit: Int, nextToken: String): Movies
+}

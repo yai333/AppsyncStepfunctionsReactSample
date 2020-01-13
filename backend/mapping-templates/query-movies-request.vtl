@@ -1,0 +1,17 @@
+{
+    "version": "2017-02-28",
+    "operation": "Query",
+    "index" : "movieTypeIndex" ,
+    "scanIndexForward" : true,
+    "limit": ${context.arguments.limit},
+    "query": {
+      "expression": "#type=:t and price >= :p",
+      "expressionNames": {
+      	"#type" : "type",
+      },
+      "expressionValues": {
+        ":t" :{ "S" :"movie"},
+        ":p" :{ "N" : 0},
+      }
+    }
+}

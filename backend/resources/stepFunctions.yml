@@ -1,0 +1,47 @@
+stateMachines:
+  syncMoviesProcess:
+    name: syncMoviesProcess-${self:provider.stage}
+    definition:
+      StartAt: getMovies
+      States:
+        getMovies:
+          Type: Map
+          MaxConcurrency: 0
+          ItemsPath: "$.sources"
+          Parameters:
+            accessToken: ${self:custom.apiAccessToken}
+            source.$: "$$.Map.Item.Value"
+          Iterator:
+            StartAt: getMovieItems
+            States:
+              getMovieItems:
+                Type: Task
+                Resource: arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-getMovies
+                Retry:
+                  - ErrorEquals: ["States.TaskFailed"]
+                    IntervalSeconds: 5
+                    MaxAttempts: 2
+                    BackoffRate: 2.0
+                Next: syncMovie
+              syncMovie:
+                Type: Map
+                MaxConcurrency: 10
+                ItemsPath: "$.movies"
+                Parameters:
+                  accessToken: ${self:custom.apiAccessToken}
+                  movieTable: ${self:custom.moviesTable}
+                  source.$: "$$.Map.Item.Value"
+                End: true
+                Iterator:
+                  StartAt: SyncMovieItem
+                  States:
+                    SyncMovieItem:
+                      Type: Task
+                      Resource: arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-syncMovieItem
+                      Retry:
+                        - ErrorEquals: ["States.TaskFailed"]
+                          IntervalSeconds: 5
+                          MaxAttempts: 2
+                          BackoffRate: 2.0
+                      End: True
+          End: true

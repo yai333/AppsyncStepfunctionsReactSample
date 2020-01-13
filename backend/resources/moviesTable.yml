@@ -1,0 +1,45 @@
+Type: AWS::DynamoDB::Table
+Properties:
+  TableName: ${self:custom.moviesTable}
+  AttributeDefinitions:
+    - AttributeName: id
+      AttributeType: S
+    - AttributeName: source
+      AttributeType: S
+    - AttributeName: country
+      AttributeType: S
+    - AttributeName: type
+      AttributeType: S
+    - AttributeName: price
+      AttributeType: N
+  KeySchema:
+    - AttributeName: id
+      KeyType: HASH
+    - AttributeName: source
+      KeyType: RANGE
+  LocalSecondaryIndexes:
+    - IndexName: locationIndex
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: country
+          KeyType: RANGE
+      Projection:
+        ProjectionType: ALL
+  GlobalSecondaryIndexes:
+    - IndexName: movieTypeIndex
+      KeySchema:
+        - AttributeName: type
+          KeyType: HASH
+        - AttributeName: price
+          KeyType: RANGE
+      Projection:
+        ProjectionType: KEYS_ONLY
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughputs.${self:provider.stage}}
+        WriteCapacityUnits: ${self:custom.tableThroughputs.${self:provider.stage}}
+  ProvisionedThroughput:
+    ReadCapacityUnits: ${self:custom.tableThroughputs.${self:provider.stage}}
+    WriteCapacityUnits: ${self:custom.tableThroughputs.${self:provider.stage}}
+  StreamSpecification:
+    StreamViewType: NEW_IMAGE
