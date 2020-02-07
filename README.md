@@ -7,7 +7,6 @@ Design a solution to have a functioning app when not all of the providers are fu
 # Solution
 
 This solution includes Appsync backend `backend/` and react frontend `fontend/`.
-Demo url http://moviejet.price.check.s3-website-ap-southeast-2.amazonaws.com/
 
 ## Backend
 
@@ -62,8 +61,6 @@ npm test
 # Frontend
 
 Frontend is a simple react website to get movie with cheapest price or all movies sorted by price.
-
-Demo url is at http://moviejet.price.check.s3-website-ap-southeast-2.amazonaws.com/
 
 ![](frontend.png)
 
