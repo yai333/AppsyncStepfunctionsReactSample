@@ -10,7 +10,7 @@
   "dependencies": {
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
-    "serverless-appsync-plugin": "^1.2.0",
+    "serverless-appsync-plugin": "git+https://github.com/yai333/serverless-appsync-plugin.git",
     "serverless-pseudo-parameters": "^2.5.0"
   },
   "devDependencies": {

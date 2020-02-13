@@ -1,4 +1,4 @@
-service: moviejet
+service: appsyncsample
 
 provider:
   stage: ${opt:stage, 'dev'}
@@ -40,6 +40,7 @@ custom:
     serviceRole: "AppSyncServiceRole"
     region: ${self:provider.region}
     authenticationType: API_KEY
+    xrayEnabled: true
     caching:
       behavior: PER_RESOLVER_CACHING
       ttl: 1000

@@ -4,7 +4,7 @@ AWS.config.region = "ap-southeast-2";
 const stepfunctions = new AWS.StepFunctions({ apiVersion: "2016-11-23" });
 const rp = require("request-promise");
 const request = require("request");
-const BASE_URL = "http://webjetapitest.azurewebsites.net/api";
+const BASE_URL = "YOUR_API_URL";
 const isTest = process.env.JEST_WORKER_ID;
 const documentClient = new AWS.DynamoDB.DocumentClient({
   ...(isTest && {
